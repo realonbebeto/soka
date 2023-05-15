@@ -1,0 +1,5 @@
+load_from:
+  - python_file:
+      relative_path: soka/definition.py
+      location_name: ingestion_pipeline
+      executable_path: .venv/bin/python
