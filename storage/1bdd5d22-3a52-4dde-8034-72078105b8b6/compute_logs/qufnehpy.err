@@ -1,7 +1,0 @@
-[32m2023-05-28 19:38:15 +0300[0m - dagster - [34mDEBUG[0m - download_job_local - 1bdd5d22-3a52-4dde-8034-72078105b8b6 - 20158 - LOGS_CAPTURED - Started capturing logs in process (pid: 20158).
-[32m2023-05-28 19:38:15 +0300[0m - dagster - [34mDEBUG[0m - download_job_local - 1bdd5d22-3a52-4dde-8034-72078105b8b6 - 20158 - download_dataset - STEP_START - Started execution of step "download_dataset".
-[32m2023-05-28 19:38:55 +0300[0m - dagster - [34mINFO[0m - download_job_local - 1bdd5d22-3a52-4dde-8034-72078105b8b6 - download_dataset - New dataset downloaded successfully
-[32m2023-05-28 19:38:55 +0300[0m - dagster - [34mDEBUG[0m - download_job_local - 1bdd5d22-3a52-4dde-8034-72078105b8b6 - 20158 - download_dataset - STEP_OUTPUT - Yielded output "result" of type "Int?". (Type check passed).
-[32m2023-05-28 19:38:55 +0300[0m - dagster - [34mDEBUG[0m - download_job_local - 1bdd5d22-3a52-4dde-8034-72078105b8b6 - download_dataset - Writing file at: /Users/realonbebeto/Kazispace/local/py/soka/storage/1bdd5d22-3a52-4dde-8034-72078105b8b6/download_dataset/result
-[32m2023-05-28 19:38:55 +0300[0m - dagster - [34mDEBUG[0m - download_job_local - 1bdd5d22-3a52-4dde-8034-72078105b8b6 - 20158 - download_dataset - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
-[32m2023-05-28 19:38:55 +0300[0m - dagster - [34mDEBUG[0m - download_job_local - 1bdd5d22-3a52-4dde-8034-72078105b8b6 - 20158 - download_dataset - STEP_SUCCESS - Finished execution of step "download_dataset" in 40.38s.
