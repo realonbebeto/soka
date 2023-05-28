@@ -1,5 +1,5 @@
 from dagster import graph
-from soka.ops.op import download_dataset, ingest_datasets
+from soka.ops.op import fetch_version, download_dataset, ingest_datasets
 from soka.resources.resource import postgres_resource
 from soka.core.config import settings
 
@@ -28,6 +28,12 @@ dev_local = {
     "ops": {"ingest_datasets": {"config": {"index_cols": index_cols, "dir": "./data"}}},
 }
 
+@graph
+def version_job():
+    # fetch version
+    fetch_version()
+
+
 
 @graph
 def download_job():
@@ -39,6 +45,9 @@ def download_job():
 def ingest_job():
     ingest_datasets()
 
+
+version_job_local = version_job.to_job(name="version_job_local",
+                                        tags={"dev": True})
 
 download_job_local = download_job.to_job(name="download_job_local", 
                                  tags={"dev": True})

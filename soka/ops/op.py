@@ -1,10 +1,11 @@
 import kaggle
-from dagster import op, AssetMaterialization, Output, Field, RetryPolicy
+from dagster import op, AssetMaterialization, Output, Field, RetryPolicy, DataVersion
 from soka.core.config import settings
 from soka.assets.asset import ins
 from typing import Union
 from datetime import datetime
 import os
+from soka.utils.util import convert_dataversion_to_int
 
 
 dataset_id = settings.dataset_id
@@ -14,6 +15,17 @@ def reset_temp_dir(dir: str):
         if csv.endswith(".csv"):
             os.remove(os.path.join(dir, csv))
 
+#Op that fetches the latest version of data to be used to trigger a sensor
+@op(name="latest_version", retry_policy=RetryPolicy(max_retries=3, delay=3), description="Fetching the version and logging it as an output")
+def fetch_version():
+    kaggle.api.authenticate()
+    versions = list(kaggle.api.dataset_view(dataset_id).versions)
+    version = convert_dataversion_to_int(versions[0])
+    yield AssetMaterialization(asset_key="latest_version",
+                               description="Fetched version",
+                               metadata={"version": version})
+    yield Output(version, data_version=DataVersion(str(version)))
+
 
 @op(description="Downloading kaggle dataset")
 def download_dataset(context) -> Union[int, None]:
@@ -21,8 +33,9 @@ def download_dataset(context) -> Union[int, None]:
         # authenticate 
         kaggle.api.authenticate()
         kaggle.api.dataset_download_files(dataset_id, path='./data', unzip=True)
+        version = convert_dataversion_to_int(list(kaggle.api.dataset_view(dataset_id).versions)[0])
         context.log.info(f"New dataset downloaded successfully")
-        return 200
+        return version
     except Exception as err:
         context.log.error(f"Error downloading dataset: {err}")
 

@@ -1,22 +1,29 @@
-from dagster import sensor, RunRequest, SkipReason
-from soka.jobs.job import download_job_local, ingest_job_local
+from dagster import sensor, RunRequest, SkipReason, AssetKey
+from soka.jobs.job import version_job_local, download_job_local, ingest_job_local
 import os
-from datetime import datetime
+from soka.utils.util import convert_dataversion_to_int, get_metadata_version
+import kaggle
+from soka.core.config import settings
 
-@sensor(name="latest_version_sensor", job=download_job_local, minimum_interval_seconds=30)
-def latest_version_sensor():
-    old = 0
-    new=1
-    # # context.assets.get("latest_version").read()
-    # fetch_version = latest_version()
-    # new = fetch_version()
+dataset_id = settings.dataset_id
 
-
-    if not new > old:
-        yield SkipReason("No new version available")
-        return
-
-    yield RunRequest(run_key="latest_version_"+str(new))
+@sensor(name="latest_version_sensor", jobs=[version_job_local, download_job_local], minimum_interval_seconds=30)
+def latest_version_sensor(context):
+    kaggle.api.authenticate()
+    versions = list(kaggle.api.dataset_view(dataset_id).versions)
+    version = convert_dataversion_to_int(versions[0])
+    
+    prev_version = get_metadata_version(context)
+    if prev_version is None:
+        yield RunRequest(job_name="version_job_local", run_key="fetched_version_"+str(version))
+        yield RunRequest(job_name="download_job_local", run_key="downloaded_version_"+str(version))
+    elif prev_version:
+        if version <= prev_version:
+            yield SkipReason("No new version available to download")
+            return None
+        
+        yield RunRequest(job_name="version_job_local", run_key="fetched_version_"+str(version))
+        yield RunRequest(job_name="download_job_local", run_key="downloaded_version_"+str(version))
 
 
 @sensor(name="check_files_sensor", job=ingest_job_local, minimum_interval_seconds=60)

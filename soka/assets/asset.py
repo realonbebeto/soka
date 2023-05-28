@@ -1,26 +1,5 @@
-import kaggle
-from soka.core.config import settings
-from dagster import asset, RetryPolicy, AssetMaterialization, Output
+from dagster import asset, AssetKey, DagsterEventType, EventRecordsFilter
 import pandas as pd
-from datetime import datetime
-
-
-dataset_id = settings.dataset_id
-
-def convert_DataVersion_to_int(dv):
-    return int(dv.versionNumber)
-
-# Asset that fetches the latest version of data to be used to trigger a sensor
-@asset(name="latest_version", compute_kind="data_poll", retry_policy=RetryPolicy(max_retries=3, delay=3))
-def fetch_versions() -> int:
-    kaggle.api.authenticate()
-    versions = list(kaggle.api.dataset_view(dataset_id).versions)
-    asset_key = f"version_{datetime.utcnow()}"
-    metadata = {"latest_version": convert_DataVersion_to_int(versions[0])}
-    yield AssetMaterialization(asset_key=asset_key, metadata=metadata)
-    version = convert_DataVersion_to_int(versions[0])
-    # yield Output(version)
-    return version
 
 
 @asset(compute_kind="read_data")
@@ -54,6 +33,13 @@ def player_valuations():
 @asset(compute_kind="read_data")
 def players():
     return pd.read_csv("./data/players.csv")
+
+# @asset(name="view_asset_tags")
+# def view_asset_tags(context):
+#     print(context.instance.get_event_records(
+# EventRecordsFilter(asset_key=AssetKey("latest_version"),
+#         event_type=DagsterEventType.ASSET_MATERIALIZATION)
+#     )[-1].event_log_entry.dagster_event.event_specific_data.materialization.metadata["version"].value)
 
 ins = {
     "appearances":appearances, 
