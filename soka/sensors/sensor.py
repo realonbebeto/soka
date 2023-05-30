@@ -44,6 +44,7 @@ def check_files_sensor(context):
 
     if len(csv_files) < 8:
         yield SkipReason("No csv files found")
+        context.update_cursor(str(max_mtime))
         return None
     
     for csv in csv_files:

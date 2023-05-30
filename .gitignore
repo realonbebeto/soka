@@ -7,3 +7,4 @@ data/
 .telemetry/
 logs/
 storage/
+.DS_Store

@@ -62,3 +62,4 @@ def ingest_datasets(context):
     
     #Clearing the temporary data directory
     reset_temp_dir(dir)
+    context.log.info("Data dir reset/cleared")
