@@ -1,0 +1,138 @@
+version: 2
+
+models:
+  - name: date_dim
+    description: This table is a date descriptor
+
+    columns: 
+      - name: date_key
+        tests:
+            - unique
+            - not_null
+
+      - name: date
+      - name: date_description
+      - name: day_of_week
+      - name: day_number_in_calendar_month
+      - name: day_number_in_calendar_year
+      - name: calendar_week_number_in_year
+      - name: calendar_month_name
+      - name: calendar_month_number_in_year
+      - name: calendar_year_month
+      - name: calendar_year
+      - name: weekday_indicator
+      - name: created_at
+  
+  - name: club_dim
+    description: This table is a club descriptor
+
+    columns:
+      - name: club_key
+        tests:
+            - unique
+            - not_null
+
+      - name: club_id
+      - name: club_name
+      - name: stadium_name
+      - name: stadium_seats
+      - name: created_at
+
+
+  - name: player_dim
+    description: This table is a player descriptor
+
+    columns:
+      - name: player_key
+        tests:
+          - unique
+          - not_null
+
+      - name: player_id
+      - name: first_name
+      - name: last_name
+      - name: name
+      - name: last_season
+      - name: country_of_birth
+      - name: city_of_birth
+      - name: country_of_citizenship
+      - name: date_of_birth
+      - name: foot
+      - name: height_in_cm
+      - name: agent_name 
+      - name: highest_market_value_in_eur
+      - name: date_of_valuation
+      - name: market_value_in_eur
+      - name: created_at
+
+  - name: match_dim
+    description: This table is a match descriptor
+
+    columns:
+      - name: match_key
+        tests:
+          - unique
+          - not_null
+
+      - name: game_id
+      - name: season
+      - name: round
+      - name: home_club_name
+      - name: away_club_name
+      - name: home_club_manager_name
+      - name: away_club_manager_name
+      - name: competition_name
+      - name: competition_sub_type
+      - name: competion_type
+      - name: competition_country
+      - name: competition_confederation
+      - name: home_club_goals
+      - name: away_club_goals
+      - name: stadium
+      - name: attendance
+      - name: referee
+      - name: home_club_formation
+      - name: away_club_formation
+      - name: created_at
+
+  - name: player_stats
+    description: This table measures player performance
+
+    columns:
+      - name: player_stat_key
+        tests:
+          - unique
+          - not_null
+
+      - name: date_key
+      - name: club_key
+      - name: match_key
+      - name: player_key
+      - name: minute
+      - name: event_type
+      - name: event_description
+      - name: yellow_cards
+      - name: red_cards
+      - name: goals
+      - name: assists
+      - name: created_at
+
+
+  - name: appearance_coverage
+    description: This table monitors player involvement
+
+    columns: 
+      - name: appearance_key
+        tests:
+          - unique
+          - not_null
+          
+      - name: date_key
+      - name: player_key
+      - name: match_key
+      - name: club_key
+      - name: type
+      - name: position
+      - name: team_captain
+      - name: minutes_played
+      - name: created_at

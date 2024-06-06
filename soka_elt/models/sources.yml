@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: soka_raw
+    database: soka
+    schema: raw 
+    tables:
+      - name: appearance
+      - name: club
+      - name: club_game
+      - name: competition
+      - name: game
+      - name: game_event
+      - name: game_lineup
+      - name: player
+      - name: player_valuation
+
+  - name: soka_prod
+    database: soka
+    schema: prod
+    tables:
+      - name: date_dim
+      - name: club_dim
+      - name: player_dim
+      - name: match_dim
+      - name: player_stats
+      - name: appearance_coverage
