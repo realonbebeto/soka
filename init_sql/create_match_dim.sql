@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS prod.match_dim (
+    match_key BIGSERIAL NOT NULL PRIMARY KEY,
+    game_id BIGINT NOT NULL, 
+    season INT,
+    round VARCHAR(255),
+    home_club_name VARCHAR(255),
+    away_club_name VARCHAR(255),
+    home_club_manager_name VARCHAR(255),
+    away_club_manager_name VARCHAR(255),
+    competition_name VARCHAR(255),
+    competion_type VARCHAR(255),
+    competition_sub_type VARCHAR(255),
+    competition_country VARCHAR(255),
+    competition_confederation VARCHAR(255),
+    home_club_goals INT,
+    away_club_goals INT,
+    stadium VARCHAR(255),
+    attendance INT,
+    referee VARCHAR(255),
+    home_club_formation VARCHAR(255),
+    away_club_formation VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT current_timestamp
+);
