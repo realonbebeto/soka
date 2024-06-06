@@ -1,7 +1,7 @@
 import sqlalchemy
-from dagster import Field, String, resource, List
+from sqlalchemy import text
+from dagster import Field, String, resource
 import pandas as pd
-import os
 
 
 class Postgres:
@@ -18,11 +18,20 @@ class Postgres:
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
 
     def execute_query(self, query: str):
-        self._engine.execute(query)
+        return self._engine.execute(query)
 
-    def ingest_data(self, table: str, data: pd.DataFrame, index_cols: List):
+    def ingest_data(self, schema: str, table: str, data: pd.DataFrame, if_exists: str ='append'):
         with self._engine.connect() as conn:
-            data.to_sql(name=table, con=conn, if_exists='replace', index=False, index_label=index_cols)
+            data.to_sql(name=table, con=conn, schema=schema, if_exists=if_exists, index=False)
+
+    def get_min_date(self, schema: str, table: str):
+            with self._engine.connect() as conn:
+                result = conn.execute(text(f"SELECT MIN(date) from {schema}.{table}")).scalar()
+            
+            return result
+
+
+    
         
 
 

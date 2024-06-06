@@ -3,4 +3,4 @@ telemetry:
 
 storage:
   postgres:
-    postgres_url: postgresql://main:main123@localhost:5432/dagster
+    postgres_url: postgresql://main:main123@localhost:5433/dagster

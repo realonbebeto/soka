@@ -1,33 +1,16 @@
-from dagster import sensor, RunRequest, SkipReason, AssetKey
+from dagster import sensor, RunRequest, SkipReason
 from soka.jobs.job import version_job_local, download_job_local, ingest_job_local
 import os
-from soka.utils.util import convert_dataversion_to_int, get_metadata_version
-import kaggle
+from soka.utils.util import get_metadata_version, try_for_version
 from soka.core.config import settings
 
-dataset_id = settings.dataset_id
+import copy
 
-@sensor(name="latest_version_sensor", jobs=[version_job_local, download_job_local], minimum_interval_seconds=30)
-def latest_version_sensor(context):
-    kaggle.api.authenticate()
-    versions = list(kaggle.api.dataset_view(dataset_id).versions)
-    version = convert_dataversion_to_int(versions[0])
-    
-    prev_version = get_metadata_version(context)
-    if prev_version is None:
-        yield RunRequest(job_name="version_job_local", run_key="fetched_version_"+str(version))
-        yield RunRequest(job_name="download_job_local", run_key="downloaded_version_"+str(version))
-    elif prev_version:
-        if version <= prev_version:
-            yield SkipReason("No new version available to download")
-            return None
-        
-        yield RunRequest(job_name="version_job_local", run_key="fetched_version_"+str(version))
-        yield RunRequest(job_name="download_job_local", run_key="downloaded_version_"+str(version))
+owner_slug, dataset_slug = settings.dataset_id.split("/")
+start_version = 428
 
 
-@sensor(name="check_files_sensor", job=ingest_job_local, minimum_interval_seconds=60)
-def check_files_sensor(context):
+def ingest_request(context):
     """
     Checks if there are any files in the temporary directory to be ingested
     """
@@ -56,3 +39,29 @@ def check_files_sensor(context):
     yield RunRequest(run_key="check_files"+f":{str(max_mtime)}")
     
     context.update_cursor(str(max_mtime))
+
+@sensor(name="download_ingest_sensor", jobs=[version_job_local, download_job_local, ingest_job_local], minimum_interval_seconds=60)
+def download_ingest_sensor(context):
+    global start_version
+    curr_version = get_metadata_version(context, "latest_version")
+    tmp_curr = copy.deepcopy(curr_version)
+
+    if curr_version is None:
+        curr_version = start_version
+        run_config = {"ops": {"record_version": {"config": {"version": curr_version}}}}
+        yield RunRequest(job_name="download_job_local", run_key=f"downloaded_version_{curr_version}")
+        yield RunRequest(job_name="version_job_local", run_key=f"recorded_version_{curr_version}", run_config=run_config)
+        ingest_request(context)
+
+    else:
+        curr_version = try_for_version(owner_slug, dataset_slug, curr_version+1)
+
+        if not curr_version or curr_version <= tmp_curr:
+            yield SkipReason("No new version available to download")
+            return
+        
+        context.log.info(f"Current version: {curr_version}")
+        run_config = {"ops": {"record_version": {"config": {"version": curr_version}}}}
+        yield RunRequest(job_name="download_job_local", run_key=f"downloaded_version_{curr_version}")
+        yield RunRequest(job_name="version_job_local", run_key=f"recorded_version_{curr_version}", run_config=run_config)
+        ingest_request(context)

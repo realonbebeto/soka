@@ -1,19 +1,13 @@
 from dagster import graph
-from soka.ops.op import fetch_version, download_dataset, ingest_datasets
+from soka.ops.op import record_version, download_dataset, ingest_datasets_raw, create_dim_dates
 from soka.resources.resource import postgres_resource
 from soka.core.config import settings
 
-index_cols = {
-    "appearances": ["appearance_id"], 
-    "club_games": ["club_id", "game_id"], 
-    "clubs": ["club_id"], 
-    "competitions": ["competition_id"], 
-    "game_events": ["game_id", "club_id", "player_id", "minute"], 
-    "games": ["game_id"], 
-    "player_valuations": ["date", "player_id"], 
-    "players": ["player_id"]}
-
 dev_local = {
+    "ops": {"ingest_datasets_raw": {"config": {"dir": "./data"}}},
+}
+
+db_config = {
     "resources": {
         "database": {
             "config": {
@@ -24,14 +18,13 @@ dev_local = {
                 "database": settings.db_name
             }
         }
-    },
-    "ops": {"ingest_datasets": {"config": {"index_cols": index_cols, "dir": "./data"}}},
+    }
 }
 
 @graph
 def version_job():
     # fetch version
-    fetch_version()
+    record_version()
 
 
 
@@ -43,8 +36,11 @@ def download_job():
 
 @graph
 def ingest_job():
-    ingest_datasets()
+    ingest_datasets_raw()
 
+@graph
+def dates_job():
+    create_dim_dates()
 
 version_job_local = version_job.to_job(name="version_job_local",
                                         tags={"dev": True})
@@ -52,8 +48,15 @@ version_job_local = version_job.to_job(name="version_job_local",
 download_job_local = download_job.to_job(name="download_job_local", 
                                  tags={"dev": True})
 
+
 ingest_job_local = ingest_job.to_job(name="ingest_job_local", 
-                                 config=dev_local,
+                                 config=dev_local.update(db_config),
+                                 resource_defs={"database": postgres_resource},
+                                 tags={"dev": True})
+
+
+create_date_dim_local = dates_job.to_job(name="create_date_dim_local", 
+                                 config=db_config,
                                  resource_defs={"database": postgres_resource},
                                  tags={"dev": True})
 

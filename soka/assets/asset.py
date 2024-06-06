@@ -1,10 +1,10 @@
-from dagster import asset, AssetKey, DagsterEventType, EventRecordsFilter
+from dagster import asset
 import pandas as pd
 
 
 @asset(compute_kind="read_data")
 def appearances():
-    return pd.read_csv("./data/appearances.csv").astype({'date': 'datetime64[ns]'})
+    return pd.read_csv("./data/appearances.csv").astype({'date': 'datetime64[D]'})
 
 @asset(compute_kind="read_data")
 def club_games():
@@ -20,7 +20,11 @@ def competitions():
 
 @asset(compute_kind="read_data")
 def game_events():
-    return pd.read_csv("./data/game_events.csv")
+    return pd.read_csv("./data/game_events.csv").astype({'date': 'datetime64[D]'})
+
+@asset(compute_kind="read_data")
+def game_lineups():
+    return pd.read_csv("./data/game_lineups.csv").astype({'date': 'datetime64[D]'})
 
 @asset(compute_kind="read_data")
 def games():
@@ -28,11 +32,11 @@ def games():
 
 @asset(compute_kind="read_data")
 def player_valuations():
-    return pd.read_csv("./data/player_valuations.csv").astype({'date': 'datetime64[ns]', 'datetime': 'datetime64[ns]', 'dateweek': 'datetime64[ns]'})
+    return pd.read_csv("./data/player_valuations.csv").astype({'date': 'datetime64[D]'})
 
 @asset(compute_kind="read_data")
 def players():
-    return pd.read_csv("./data/players.csv")
+    return pd.read_csv("./data/players.csv").astype({'date_of_birth': 'datetime64[D]'})
 
 # @asset(name="view_asset_tags")
 # def view_asset_tags(context):
@@ -47,6 +51,7 @@ ins = {
     "clubs": clubs, 
     "competitions": competitions, 
     "game_events": game_events, 
+    "game_lineups": game_lineups,
     "games": games, 
     "player_valuations": player_valuations, 
     "players": players}
