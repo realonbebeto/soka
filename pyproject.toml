@@ -1,22 +1,16 @@
-[tool.poetry]
+[project]
 name = "soka"
 version = "0.1.0"
 description = "soka analytics"
-authors = ["realonbebeto <projobs254@gmail.com>"]
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "3.10.14"
-dagster = "^1.7.6"
-dagster-webserver = "^1.7.6"
-dagster-postgres = "^0.23.6"
-kaggle = "^1.6.14"
-pydantic-settings = "^2.2.1"
-pandas = "^2.2.2"
-dbt = "^1.0.0.37.15"
-dbt-postgres = "^1.8.1"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.13.1"
+dependencies = [
+    "dagster-webserver>=1.9.6",
+    "dagster>=1.9.6",
+    "pandas>=2.2.3",
+    "dagster-postgres>=0.25.6",
+    "kaggle>=1.6.17",
+    "pydantic-settings>=2.7.0",
+    "dbt>=1.0.0.38.22",
+    "dbt-postgres>=1.9.0",
+]
